@@ -47,6 +47,7 @@ from virttest import utils_test
 from virttest import utils_iptables
 from virttest import utils_package
 from virttest import utils_qemu
+from virttest import utils_kernel_module
 from virttest.utils_version import VersionInterval
 from virttest.compat_52lts import decode_to_text
 from virttest.staging import service
@@ -79,6 +80,8 @@ preprocess_vm_on_hook = None
 postprocess_vm_on_hook = None
 postprocess_vm_off_hook = None
 
+#: Object to handle kvm module reloads with certain parameters
+KVM_MODULE_HANDLER = None
 
 #: QEMU version regex.  Attempts to extract the simple and extended version
 #: information from the output produced by `qemu -version`
@@ -1047,6 +1050,11 @@ def preprocess(test, params, env):
                     env["cpu_driver"] = cpu_driver[0]
                     params["cpu_driver"] = env.get("cpu_driver")
 
+    kvm_module_params = params.get("kvm_module_parameters", "")
+    force_load = params.get("kvm_module_force_load", "no") == "yes"
+    global KVM_MODULE_HANDLER
+    KVM_MODULE_HANDLER = utils_kernel_module.load("kvm", force_load, kvm_module_params)
+
     version_info = {}
     # Get the KVM kernel module version
     if os.path.exists("/dev/kvm"):
@@ -1586,6 +1594,10 @@ def postprocess(test, params, env):
         except Exception as details:
             err += "\nTHP cleanup: %s" % str(details).replace('\\n', '\n  ')
             logging.error(details)
+
+    global KVM_MODULE_HANDLER
+    if KVM_MODULE_HANDLER:
+        KVM_MODULE_HANDLER.restore()
 
     if params.get("setup_ksm") == "yes":
         try:
