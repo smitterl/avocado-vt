@@ -345,6 +345,124 @@ class PCIXML(CAPXML):
         return address
 
 
+class CCWXML(CAPXML):
+
+    """
+    class for capability whose type is ccw.
+    """
+
+    # Example:
+    # <capability type='ccw'>
+    #     <cssid>0x0</cssid>
+    #     <ssid>0x0</ssid>
+    #     <devno>0x0600</devno>
+    # </capability>
+
+    __slots__ = ('subchannel', 'cssid', 'ssid', 'devno')
+
+    def __init__(self, virsh_instance=base.virsh):
+        accessors.XMLElementInt('cssid', self, parent_xpath='/',
+                                tag_name='cssid')
+        accessors.XMLElementInt('ssid', self, parent_xpath='/',
+                                tag_name='ssid')
+        accessors.XMLElementInt('devno', self, parent_xpath='/',
+                                tag_name='devno')
+
+        super(CCWXML, self).__init__(virsh_instance=virsh_instance)
+        self.xml = (' <capability type=\'ccw\'></capability>')
+        self.subchannel = '0.0.0000'
+
+    class Address(base.LibvirtXMLBase):
+
+        """
+        Address of Virtual Function device.
+        """
+
+        # Example:
+        #  <address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0005'/>
+
+        __slots__ = ('cssid', 'ssid', 'devno')
+
+        def __init__(self, virsh_instance=base.virsh):
+            accessors.XMLElementInt('cssid', self, parent_xpath='/',
+                                    tag_name='cssid')
+            accessors.XMLElementInt('ssid', self, parent_xpath='/',
+                                    tag_name='ssid')
+            accessors.XMLElementInt('devno', self, parent_xpath='/',
+                                    tag_name='devno')
+            super(CCWXML.Address, self).__init__(virsh_instance=virsh_instance)
+            self.xml = ('<address/>')
+
+    @staticmethod
+    def marshal_from_address(item, index, libvirtxml):
+        """Convert an Address instance into tag + attributes"""
+        root = item.xmltreefile.getroot()
+        if root.tag == 'address':
+            return (root.tag, dict(list(root.items())))
+        else:
+            raise xcepts.LibvirtXMLError("Expected a list of address "
+                                         "instances, not a %s" % str(item))
+
+    @staticmethod
+    def marshal_to_address(tag, attr_dict, index, libvirtxml):
+        """Convert a tag + attributes into an Address instance"""
+        if not tag == 'address':
+            return None     # Don't convert this item
+        newone = CCWXML.Address(virsh_instance=libvirtxml.virsh)
+        newone.update(attr_dict, excpt=xcepts.LibvirtXMLError)
+        return newone
+
+    @staticmethod
+    def make_sysfs_sub_path(subchannel, cssid, ssid, devno):
+        """
+        Make sysfs_sub_path for ccw by cssid,ssid,devno.
+        """
+        ccw_sysfs_sub_path = ("css0/%s/%s.%s.%s"
+                              % (subchannel, format(cssid, 'x'),
+                                 format(ssid, 'x'), format(devno, 'x')))
+
+        return ccw_sysfs_sub_path
+
+    def get_sysfs_sub_path(self):
+        """
+        Return the sysfs_subdir in .
+
+        Example:
+            0.0.0000/0.0.540a
+        """
+
+        return CCWXML.make_sysfs_sub_path(self.subchannel, self.cssid,
+                                          self.ssid, self.devno)
+
+    __key2filename_dict__ = {}
+
+    @staticmethod
+    def get_key2filename_dict():
+        """
+        return the dict key2filename.
+        key: the keys in pcixml need to check.
+        filename: the name of file stored info for this key.
+        """
+        return CCWXML.__key2filename_dict__
+
+    def get_key2value_dict(self):
+        """
+        return the dict key2value
+
+        key: the key in xml need to check.
+        value: value in xml for this key.
+        """
+        return self.get_address_dict()
+
+    def get_address_dict(self):
+        """
+        Return a dict contain the address.
+        """
+        address = {'cssid': self.cssid, 'ssid': self.ssid,
+                   'devno': self.devno}
+        return address
+
+
 class NodedevXMLBase(base.LibvirtXMLBase):
 
     """
@@ -362,6 +480,7 @@ class NodedevXMLBase(base.LibvirtXMLBase):
 
     __type2class_dict__ = {'system': 'SystemXML',
                            'pci': 'PCIXML',
+                           'ccw': 'CCWXML',
                            'usb_device': 'USBDeviceXML',
                            'usb': 'USBXML',
                            'net': 'NetXML',

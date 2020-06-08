@@ -1124,5 +1124,35 @@ class testPCIXML(LibvirtXMLTestBase):
         self.assertTrue(isinstance(result, dict))
 
 
+class testCCWXML(LibvirtXMLTestBase):
+
+    def _from_scratch(self):
+        ccwxml = nodedev_xml.CCWXML()
+        ccwxml.cssid = 0x0
+        ccwxml.ssid = 0x0
+        ccwxml.devno = 0x540a
+
+        return ccwxml
+
+    def test_static(self):
+        CCWXML = nodedev_xml.CCWXML
+        result = CCWXML.make_sysfs_sub_path('0.0.0000', 0x0, 0x0, 0x540a)
+        self.assertEqual(result, 'css0/0.0.0000/0.0.540a')
+
+    def test_get_path(self):
+        ccwxml = self._from_scratch()
+        result = ccwxml.get_sysfs_sub_path()
+        self.assertEqual(result, 'css0/0.0.0000/0.0.540a')
+
+    def test_get_key2filename_dict(self):
+        CCWXML = nodedev_xml.CCWXML
+        self.assertTrue(isinstance(CCWXML.get_key2filename_dict(), dict))
+
+    def test_get_key2value_dict(self):
+        pcixml = self._from_scratch()
+        result = pcixml.get_key2value_dict()
+        self.assertTrue(isinstance(result, dict))
+
+
 if __name__ == "__main__":
     unittest.main()
