@@ -88,6 +88,23 @@ class DomCapabilityXML(base.LibvirtXMLBase):
         finally:
             return feature_list
 
+    def update_hostmodel_cpu_definition(self, cpu_xml):
+        """
+        Construct a cpu definition from domcapabilities host-model
+        on passed argument.
+
+        :return: None
+        """
+        cpu_xml['model'] = self.get_hostmodel_name()
+        cpu_xml['arch'] = self.xmltreefile.find('arch').text
+        features = [name
+                    for f_list in
+                    [list(d.keys())
+                     for d in self.get_additional_feature_list('host-model')]
+                    for name in f_list]
+        for feature_name in features:
+            cpu_xml.add_feature(feature_name)
+
     def get_hostmodel_name(self):
         """
         Get CPU modelname which explicitly specified by <model>.text
