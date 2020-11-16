@@ -9,7 +9,6 @@ from virttest.libvirt_xml import base, xcepts, accessors
 
 
 class CAPXML(base.LibvirtXMLBase):
-
     """
     The base class for capability.
     """
@@ -37,7 +36,6 @@ class CAPXML(base.LibvirtXMLBase):
 
 
 class SystemXML(CAPXML):
-
     """
     class for capability which type is system.
     """
@@ -94,15 +92,15 @@ class NetXML(CAPXML):
     class for capability whose type is net.
     """
     # Example:
-    #<capability type='net'>
-    #<interface>eno1</interface>
-    #<address>44:37:e6:95:03:e4</address>
-    #<link speed='100' state='up'/>
-    #<feature name='rx'/>
-    #<feature name='tx'/>
-    #<capability type='80203'/>
-    #</capability>
-    #</device>
+    # <capability type='net'>
+    # <interface>eno1</interface>
+    # <address>44:37:e6:95:03:e4</address>
+    # <link speed='100' state='up'/>
+    # <feature name='rx'/>
+    # <feature name='tx'/>
+    # <capability type='80203'/>
+    # </capability>
+    # </device>
 
     __slots__ = ('interface', 'address', 'link_speed', 'link_state')
 
@@ -143,7 +141,6 @@ class NetXML(CAPXML):
 
 
 class StorageXML(CAPXML):
-
     """
     class for capability whose type is storage.
     """
@@ -159,7 +156,6 @@ class StorageXML(CAPXML):
 
 
 class PCIXML(CAPXML):
-
     """
     class for capability whose type is pci.
     """
@@ -271,7 +267,7 @@ class PCIXML(CAPXML):
     def marshal_to_address(tag, attr_dict, index, libvirtxml):
         """Convert a tag + attributes into an Address instance"""
         if not tag == 'address':
-            return None     # Don't convert this item
+            return None  # Don't convert this item
         newone = PCIXML.Address(virsh_instance=libvirtxml.virsh)
         newone.update(attr_dict, excpt=xcepts.LibvirtXMLError)
         return newone
@@ -345,7 +341,6 @@ class PCIXML(CAPXML):
 
 
 class NodedevXMLBase(base.LibvirtXMLBase):
-
     """
     Accessor methods for NodedevXML class.
 
@@ -466,7 +461,6 @@ class NodedevXMLBase(base.LibvirtXMLBase):
 
 
 class NodedevXML(NodedevXMLBase):
-
     """
     class for Node device XML.
     """
