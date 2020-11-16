@@ -155,6 +155,20 @@ class StorageXML(CAPXML):
                                  tag_name='driver_type')
 
 
+class CCWXML(CAPXML):
+    """
+    class for capability ccw
+    """
+    pass
+
+
+class CSSXML(CAPXML):
+    """
+    class for capability css
+    """
+    pass
+
+
 class PCIXML(CAPXML):
     """
     class for capability whose type is pci.
@@ -361,7 +375,9 @@ class NodedevXMLBase(base.LibvirtXMLBase):
                            'net': 'NetXML',
                            'scsi_host': 'SCSIHostXML',
                            'scsi': 'SCSIXML',
-                           'storage': 'StorageXML'}
+                           'storage': 'StorageXML',
+                           'ccw': 'CCWXML',
+                           'css': 'CSSXML'}
 
     def __init__(self, virsh_instance=base.virsh):
         accessors.XMLElementText('name', self, parent_xpath='/',
